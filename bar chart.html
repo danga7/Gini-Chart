@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gini Bar Chart</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@100;600&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.js"></script>
+    <script src="./gini.js"></script>
+    <style>
+        .infor{
+            width:60%;
+            padding-top: 20px;
+            padding-bottom: 30px;
+            padding-left: 40px;
+            padding-right: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        body{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 16px;
+            background-color: rgb(255, 244, 231);
+        }
+
+        h1{
+            text-align: center;
+            font-size: 45px;
+            padding: auto;
+        }
+
+        p{
+            text-align: center;
+        }
+
+        .bar-chart{
+            width: 80%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            background-color: bisque;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="infor">
+        <h1>World Gini Index</h1>
+        <p>The Gini Index is a summary measure of income inequality. The Gini coefficient incorporates the detailed shares data into a single statistic, which summarizes the dispersion of income across the entire income distribution. </p>
+    </div>
+    <div class="bar-chart"></div>
+
+    <script>
+
+        //setup dimensions
+        var margin = {top:60, right:40, bottom:50, left: 150},
+            height = innerHeight,
+            width = innerWidth/3*2;
+
+        //setup canvas
+        var svg = d3.select(".bar-chart")
+            .append("svg")
+            .attr("width", width)
+            .attr("height",5500)
+            .append("g")
+
+        //get and convert data to float number
+        var getData = data.map(function(e){
+            e["gini"] = parseFloat(e["gini"])
+            return e
+        })
+
+        //get highestvalue of gini
+        var maxGini = d3.max(getData, function(d){
+            return d["gini"]
+        })
+        console.log(maxGini)
+
+        //get gini extent (from min to max)
+        var extentGini = d3.extent(getData, function(d){
+            return d["gini"]
+        })
+        console.log(extentGini)
+
+        var xScale = d3.scaleLinear()
+                        .domain([0,100])
+                        .range([margin.left,width]);
+            svg.append("g")
+                .call(d3.axisBottom(xScale))
+                .attr("transform","translate(0,60)")
+                .selectAll("text")
+                 .style("text-anchor", "start")
+                 .attr("transform", `translate(0,-25)`)
+
+        var xScale2 = d3.scaleLinear()
+                .domain([0,100])
+                .range([margin.left,width]);
+            svg.append("g")
+                .attr("transform", "translate(0,5400)")
+                .call(d3.axisBottom(xScale))
+                .selectAll("text")
+                .style("text-anchor", "start")
+
+        var yScale = d3.scaleBand()
+                .range([margin.top,5400])
+                .domain(data.map(function(d){return d["country"]}))
+                .padding(.3)
+            svg.append("g")
+                .call(d3.axisLeft(yScale))
+                .attr("transform","translate(150,0)")
+
+        svg
+            .selectAll("rect")
+            .data(data)
+            .join("rect")
+                .attr("x", xScale(0))
+                .attr("y", function(d){return yScale(d["country"])})
+                .attr("width", function(e){return xScale(e["gini"])})
+                .attr("height", yScale.bandwidth())
+                .attr("fill","#ff8754")
+                .attr("opacity", "0.5")
+                .on("mouseover", function(d,i){
+                    d3.select(this).attr("opacity","1")
+                })
+                .on("mouseout", function(d,i){
+                    d3.select(this).attr("opacity","0.5")
+                })
+                
+    
+    </script>
+
+</body>
